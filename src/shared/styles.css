@@ -1,0 +1,109 @@
+:root {
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #e5e7eb;
+  background: #0b1220;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; min-width: 340px; min-height: 100vh; }
+button, input { font: inherit; }
+
+.popup {
+  width: 340px;
+  padding: 20px;
+  background: radial-gradient(circle at top right, #173a2a 0, #0b1220 42%);
+}
+
+.brand { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
+.brand-mark {
+  display: grid; place-items: center; width: 34px; height: 34px; border-radius: 10px;
+  background: #22c55e; color: #052e16; font-weight: 900;
+}
+.brand h1 { margin: 0; font-size: 20px; letter-spacing: -0.02em; }
+.brand p { margin: 2px 0 0; color: #94a3b8; font-size: 12px; }
+
+.status-card {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 14px; border: 1px solid #243044; border-radius: 14px;
+  background: rgba(15, 23, 42, 0.78); margin-bottom: 12px;
+}
+.label { color: #94a3b8; font-size: 12px; margin-bottom: 4px; }
+.value { max-width: 215px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14px; font-weight: 650; }
+.badge { color: #86efac; background: #14532d; padding: 5px 9px; border-radius: 999px; font-size: 11px; font-weight: 800; }
+
+.actions { display: grid; gap: 9px; margin-top: 16px; }
+.button {
+  width: 100%; border: 0; border-radius: 11px; padding: 11px 14px;
+  cursor: pointer; font-weight: 750; transition: transform 120ms ease, opacity 120ms ease;
+}
+.button:hover { transform: translateY(-1px); }
+.button:disabled { cursor: not-allowed; opacity: 0.55; transform: none; }
+.button-primary { color: #052e16; background: #4ade80; }
+.button-secondary { color: #e5e7eb; background: #1e293b; border: 1px solid #334155; }
+.message { min-height: 18px; margin: 10px 2px 0; color: #86efac; font-size: 12px; }
+.text-button { border: 0; color: #94a3b8; background: transparent; cursor: pointer; font-size: 12px; text-decoration: underline; }
+
+.settings-page { display: grid; gap: 16px; max-width: 760px; margin: 0 auto; padding: 48px 24px 64px; }
+.settings-card { padding: 28px; border: 1px solid #243044; border-radius: 18px; background: #111827; }
+.settings-hero { background: radial-gradient(circle at top right, #173a2a 0, #111827 58%); }
+.settings-card h1 { margin: 0 0 8px; }
+.settings-card h2 { margin: 0; font-size: 19px; }
+.settings-card p { color: #94a3b8; line-height: 1.65; }
+.site-list { display: grid; gap: 8px; margin-top: 20px; padding: 0; list-style: none; }
+.site-list li { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 12px 14px; border-radius: 10px; background: #0f172a; }
+.site-list li > div { display: grid; gap: 4px; }
+.site-list span { color: #86efac; font-size: 10px; font-weight: 800; letter-spacing: 0.08em; }
+.remove-button { padding: 7px 10px; border: 1px solid #7f1d1d; border-radius: 8px; color: #fecaca; background: #450a0a; cursor: pointer; }
+.remove-button:hover { background: #7f1d1d; }
+.empty-row { justify-content: center !important; color: #94a3b8; }
+.protection-row { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding-top: 8px; }
+.compact-button { width: auto; white-space: nowrap; }
+.warning-text { margin: 4px 0 0 !important; color: #fbbf24 !important; font-size: 12px; }
+.section-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; }
+.section-heading p { margin: 5px 0 16px; }
+.inline-form { display: grid; grid-template-columns: 1fr auto; gap: 8px; margin-top: 10px; }
+.inline-form input, .field-label input, .time-grid input {
+  width: 100%; min-height: 42px; border: 1px solid #334155; border-radius: 10px; padding: 10px 12px;
+  color: #e5e7eb; background: #0b1220; outline-color: #4ade80;
+}
+.form-button { width: auto; white-space: nowrap; }
+.setting-toggle { display: flex; gap: 12px; align-items: flex-start; margin-top: 14px; cursor: pointer; }
+.setting-toggle input { width: 18px; height: 18px; margin: 2px 0 0; accent-color: #4ade80; }
+.setting-toggle span { display: grid; gap: 3px; }
+.setting-toggle small { color: #94a3b8; line-height: 1.45; }
+.day-picker { display: flex; flex-wrap: wrap; gap: 8px; margin: 18px 0 12px; }
+.day-button { min-width: 48px; border: 1px solid #334155; border-radius: 9px; padding: 8px 10px; color: #cbd5e1; background: #0f172a; cursor: pointer; }
+.day-button.active { color: #052e16; border-color: #4ade80; background: #4ade80; font-weight: 800; }
+.time-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.time-grid label, .field-label { display: grid; gap: 7px; color: #cbd5e1; font-size: 13px; font-weight: 700; }
+.field-label { margin-top: 16px; }
+
+.blocked-page {
+  min-height: 100vh; display: grid; place-items: center; padding: 24px;
+  background: radial-gradient(circle at top, #173a2a 0, #0b1220 45%);
+}
+.blocked-card {
+  width: min(100%, 520px); padding: 42px; text-align: center;
+  border: 1px solid #26354a; border-radius: 24px; background: rgba(17, 24, 39, 0.92);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.35);
+}
+.blocked-icon {
+  display: grid; place-items: center; width: 64px; height: 64px; margin: 0 auto 20px;
+  border-radius: 20px; color: #052e16; background: #4ade80; font-size: 34px; font-weight: 900;
+}
+.blocked-kicker { color: #4ade80 !important; font-size: 12px; font-weight: 850; letter-spacing: 0.16em; }
+.blocked-card h1 { margin: 8px 0 12px; font-size: clamp(30px, 6vw, 44px); letter-spacing: -0.04em; }
+.blocked-card p { margin: 0 auto; max-width: 400px; color: #94a3b8; line-height: 1.7; }
+.blocked-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 28px; }
+
+@media (max-width: 520px) {
+  .blocked-card { padding: 30px 22px; }
+  .blocked-actions { grid-template-columns: 1fr; }
+  .settings-page { padding: 24px 14px 40px; }
+  .settings-card { padding: 20px; }
+  .inline-form { grid-template-columns: 1fr; }
+  .form-button, .compact-button { width: 100%; }
+  .protection-row { align-items: stretch; flex-direction: column; }
+}
