@@ -252,6 +252,10 @@ export function Options() {
           <input type="checkbox" checked={settings.selectiveBlocking.facebookFeedReels} disabled={busy} onChange={(event) => void save({ ...settings, selectiveBlocking: { ...settings.selectiveBlocking, facebookFeedReels: event.target.checked } }, 'Facebook Reels setting updated.')} />
           <span><strong>Block Facebook Reels</strong><small>Hides Reel cards in the feed and blocks Facebook Reel pages.</small></span>
         </label>
+        <label className="setting-toggle">
+          <input type="checkbox" checked={settings.selectiveBlocking.instagramReels} disabled={busy} onChange={(event) => void save({ ...settings, selectiveBlocking: { ...settings.selectiveBlocking, instagramReels: event.target.checked } }, 'Instagram Reels setting updated.')} />
+          <span><strong>Block Instagram Reels</strong><small>Hides Reel links and feed posts, and blocks Instagram Reel pages.</small></span>
+        </label>
       </section>
 
       <section className="settings-card">

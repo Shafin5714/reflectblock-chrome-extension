@@ -22,7 +22,10 @@
       && /^\/shorts(?:\/|$)/i.test(url.pathname))
       || (selective.facebookFeedReels
         && isDomain(url.hostname, 'facebook.com')
-        && /^\/(?:reels?|share\/r)(?:\/|$)/i.test(url.pathname));
+        && /^\/(?:reels?|share\/r)(?:\/|$)/i.test(url.pathname))
+      || (selective.instagramReels
+        && isDomain(url.hostname, 'instagram.com')
+        && /^\/reels?(?:\/|$)/i.test(url.pathname));
   }
 
   function redirectFromBlockedDestination(url) {
@@ -110,6 +113,17 @@
         }
       `);
       hideFacebookFeedReels();
+    }
+
+    if (isSite('instagram.com') && selective.instagramReels) {
+      css.push(`
+        nav a[href^="/reels"],
+        main article:has(a[href^="/reel/"]),
+        main a[href^="/reel/"],
+        main a[href^="/reels/"] {
+          display: none !important;
+        }
+      `);
     }
 
     if (css.length > 0) {

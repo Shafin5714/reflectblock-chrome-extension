@@ -12,6 +12,7 @@ export const DEFAULT_SETTINGS: FocusGuardSettings = {
   selectiveBlocking: {
     youtubeShorts: false,
     facebookFeedReels: false,
+    instagramReels: false,
   },
   strictMode: {
     enabled: false,

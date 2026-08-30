@@ -18,6 +18,7 @@ export interface BlockingSchedule {
 export interface SelectiveBlockingSettings {
   youtubeShorts: boolean;
   facebookFeedReels: boolean;
+  instagramReels: boolean;
 }
 
 export interface StrictModeSettings {

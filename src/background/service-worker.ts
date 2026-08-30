@@ -22,7 +22,10 @@ function isSelectiveRouteBlocked(
       && /^\/shorts(?:\/|$)/i.test(url.pathname))
       || (settings.selectiveBlocking.facebookFeedReels
         && isDomain(url.hostname, 'facebook.com')
-        && /^\/(?:reels?|share\/r)(?:\/|$)/i.test(url.pathname));
+        && /^\/(?:reels?|share\/r)(?:\/|$)/i.test(url.pathname))
+      || (settings.selectiveBlocking.instagramReels
+        && isDomain(url.hostname, 'instagram.com')
+        && /^\/reels?(?:\/|$)/i.test(url.pathname));
   } catch {
     return false;
   }
@@ -58,6 +61,18 @@ function getSelectiveBlockingRules(
       action: redirectAction,
       condition: {
         regexFilter: '^https://([a-z0-9-]+\\.)*facebook\\.com/(reels?|share/r)(/|\\?|#|$)',
+        resourceTypes: [chrome.declarativeNetRequest.ResourceType.MAIN_FRAME],
+      },
+    });
+  }
+
+  if (settings.selectiveBlocking.instagramReels) {
+    rules.push({
+      id: SELECTIVE_RULE_ID_START + 2,
+      priority: 2,
+      action: redirectAction,
+      condition: {
+        regexFilter: '^https://([a-z0-9-]+\\.)*instagram\\.com/reels?(/|\\?|#|$)',
         resourceTypes: [chrome.declarativeNetRequest.ResourceType.MAIN_FRAME],
       },
     });
