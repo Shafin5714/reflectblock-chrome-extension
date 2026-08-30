@@ -6,6 +6,7 @@ import {
   requestProtectionDisable,
   setProtectionEnabled,
 } from '../storage/storage';
+import { FocusGuardLogo } from '../shared/FocusGuardLogo';
 
 function getHostname(url?: string): string | null {
   if (!url) return null;
@@ -77,7 +78,7 @@ export function Popup() {
   return (
     <main className="popup">
       <header className="brand">
-        <div className="brand-mark" aria-hidden="true">F</div>
+        <FocusGuardLogo />
         <div>
           <h1>FocusGuard</h1>
           <p>Control the distracting web.</p>

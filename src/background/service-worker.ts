@@ -1,8 +1,70 @@
 import { getSettings, isScheduleActive, resolveExpiredDisableRequest } from '../storage/storage';
 import { ADULT_RULESETS } from './adult-rulesets';
 
-const RULE_ID_START = 10_000;
+const SELECTIVE_RULE_ID_START = 10_000;
+const SITE_RULE_ID_START = 20_000;
 const TICK_ALARM = 'focusguard-protection-tick';
+
+function isDomain(hostname: string, domain: string): boolean {
+  return hostname === domain || hostname.endsWith(`.${domain}`);
+}
+
+function isSelectiveRouteBlocked(
+  urlValue: string,
+  settings: Awaited<ReturnType<typeof getSettings>>,
+): boolean {
+  if (!settings.protectionEnabled) return false;
+
+  try {
+    const url = new URL(urlValue);
+    return (settings.selectiveBlocking.youtubeShorts
+      && isDomain(url.hostname, 'youtube.com')
+      && /^\/shorts(?:\/|$)/i.test(url.pathname))
+      || (settings.selectiveBlocking.facebookFeedReels
+        && isDomain(url.hostname, 'facebook.com')
+        && /^\/(?:reels?|share\/r)(?:\/|$)/i.test(url.pathname));
+  } catch {
+    return false;
+  }
+}
+
+function getSelectiveBlockingRules(
+  settings: Awaited<ReturnType<typeof getSettings>>,
+): chrome.declarativeNetRequest.Rule[] {
+  if (!settings.protectionEnabled) return [];
+
+  const rules: chrome.declarativeNetRequest.Rule[] = [];
+  const redirectAction: chrome.declarativeNetRequest.RuleAction = {
+    type: chrome.declarativeNetRequest.RuleActionType.REDIRECT,
+    redirect: { extensionPath: '/blocked.html' },
+  };
+
+  if (settings.selectiveBlocking.youtubeShorts) {
+    rules.push({
+      id: SELECTIVE_RULE_ID_START,
+      priority: 2,
+      action: redirectAction,
+      condition: {
+        regexFilter: '^https://([a-z0-9-]+\\.)*youtube\\.com/shorts(/|\\?|#|$)',
+        resourceTypes: [chrome.declarativeNetRequest.ResourceType.MAIN_FRAME],
+      },
+    });
+  }
+
+  if (settings.selectiveBlocking.facebookFeedReels) {
+    rules.push({
+      id: SELECTIVE_RULE_ID_START + 1,
+      priority: 2,
+      action: redirectAction,
+      condition: {
+        regexFilter: '^https://([a-z0-9-]+\\.)*facebook\\.com/(reels?|share/r)(/|\\?|#|$)',
+        resourceTypes: [chrome.declarativeNetRequest.ResourceType.MAIN_FRAME],
+      },
+    });
+  }
+
+  return rules;
+}
 
 async function syncAdultContentRules(enabled: boolean): Promise<void> {
   const adultRulesetIds = ADULT_RULESETS.map((ruleset) => ruleset.id);
@@ -62,13 +124,13 @@ async function syncBlockingRules(): Promise<void> {
 
   const removeRuleIds = existingRules
     .map((rule) => rule.id)
-    .filter((id) => id >= RULE_ID_START);
+    .filter((id) => id >= SELECTIVE_RULE_ID_START);
 
-  const addRules: chrome.declarativeNetRequest.Rule[] = settings.protectionEnabled && isScheduleActive(settings)
+  const siteRules: chrome.declarativeNetRequest.Rule[] = settings.protectionEnabled && isScheduleActive(settings)
     ? settings.blockedSites
         .filter((site) => site.enabled)
         .map((site, index) => ({
-          id: RULE_ID_START + index,
+          id: SITE_RULE_ID_START + index,
           priority: 1,
           action: {
             type: chrome.declarativeNetRequest.RuleActionType.REDIRECT,
@@ -80,6 +142,7 @@ async function syncBlockingRules(): Promise<void> {
           },
         }))
     : [];
+  const addRules = [...getSelectiveBlockingRules(settings), ...siteRules];
 
   await Promise.all([
     chrome.declarativeNetRequest.updateDynamicRules({ removeRuleIds, addRules }),
@@ -116,6 +179,15 @@ chrome.alarms.onAlarm.addListener((alarm) => {
 
 chrome.storage.onChanged.addListener((_changes, areaName) => {
   if (areaName === 'local') void queueRuleSync();
+});
+
+chrome.tabs.onUpdated.addListener((tabId, changeInfo) => {
+  if (!changeInfo.url) return;
+
+  void getSettings().then((settings) => {
+    if (!isSelectiveRouteBlocked(changeInfo.url!, settings)) return;
+    return chrome.tabs.update(tabId, { url: chrome.runtime.getURL('blocked.html') });
+  });
 });
 
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {

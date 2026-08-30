@@ -12,6 +12,7 @@ import {
 } from '../storage/storage';
 import type { FocusGuardSettings } from '../storage/types';
 import { ADULT_DOMAIN_COUNT } from '../background/adult-rulesets';
+import { FocusGuardLogo } from '../shared/FocusGuardLogo';
 
 const WEEK_DAYS = [
   { value: 1, label: 'Mon' },
@@ -195,7 +196,7 @@ export function Options() {
     <main className="settings-page">
       <section className="settings-card settings-hero">
         <div className="brand">
-          <div className="brand-mark" aria-hidden="true">F</div>
+          <FocusGuardLogo />
           <div><h1>FocusGuard Settings</h1><p>Build a calmer browser, one intentional rule at a time.</p></div>
         </div>
         <div className="protection-row">
@@ -245,11 +246,11 @@ export function Options() {
         <div className="section-heading"><div><h2>Selective distraction blocking</h2><p>Hide attention traps while keeping the rest of the site usable.</p></div></div>
         <label className="setting-toggle">
           <input type="checkbox" checked={settings.selectiveBlocking.youtubeShorts} disabled={busy} onChange={(event) => void save({ ...settings, selectiveBlocking: { ...settings.selectiveBlocking, youtubeShorts: event.target.checked } }, 'YouTube Shorts setting updated.')} />
-          <span><strong>Hide YouTube Shorts</strong><small>Removes Shorts shelves and navigation links. It does not block normal videos.</small></span>
+          <span><strong>Block YouTube Shorts</strong><small>Hides Shorts shelves and navigation links, and blocks Shorts pages. Normal videos remain available.</small></span>
         </label>
         <label className="setting-toggle">
           <input type="checkbox" checked={settings.selectiveBlocking.facebookFeedReels} disabled={busy} onChange={(event) => void save({ ...settings, selectiveBlocking: { ...settings.selectiveBlocking, facebookFeedReels: event.target.checked } }, 'Facebook Reels setting updated.')} />
-          <span><strong>Hide Facebook Reels in Feed</strong><small>Hides Reel cards while you scroll the Facebook feed.</small></span>
+          <span><strong>Block Facebook Reels</strong><small>Hides Reel cards in the feed and blocks Facebook Reel pages.</small></span>
         </label>
       </section>
 

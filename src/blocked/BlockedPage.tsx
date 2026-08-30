@@ -5,7 +5,7 @@ export function BlockedPage() {
         <div className="blocked-icon" aria-hidden="true">!</div>
         <p className="blocked-kicker">FOCUSGUARD</p>
         <h1>This page is blocked.</h1>
-        <p>You added this website to your FocusGuard block list. Stay focused.</p>
+        <p>FocusGuard blocked this page based on your current protection settings. Stay focused.</p>
         <div className="blocked-actions">
           <button className="button button-primary" onClick={() => history.back()}>Go Back</button>
           <button className="button button-secondary" onClick={() => chrome.runtime.openOptionsPage()}>
