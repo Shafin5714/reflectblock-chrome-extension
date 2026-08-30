@@ -2,7 +2,7 @@
 
 ## Adult-domain data
 
-FocusGuard's Adult Content Shield includes a generated snapshot of the adult-domain
+ReflectBlock's Adult Content Shield includes a generated snapshot of the adult-domain
 extension from [StevenBlack/hosts](https://github.com/StevenBlack/hosts), obtained
 on 30 August 2026. The source project is licensed under the MIT License.
 

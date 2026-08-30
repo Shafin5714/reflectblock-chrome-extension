@@ -89,7 +89,7 @@ export function Popup() {
   return (
     <main className="popup">
       <header className="popup-header">
-        <div className="brand"><FocusGuardLogo /><h1>FocusGuard</h1></div>
+        <div className="brand"><FocusGuardLogo /><h1>ReflectBlock</h1></div>
         <button className="icon-button popup-settings" onClick={() => chrome.runtime.openOptionsPage()} aria-label="Open settings"><UiIcon name="settings" size={23} /></button>
       </header>
 

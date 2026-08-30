@@ -28,7 +28,7 @@ const WEEK_DAYS = [
 
 async function syncRules(): Promise<void> {
   const response = await chrome.runtime.sendMessage({ type: 'SYNC_BLOCKING_RULES' });
-  if (!response?.ok) throw new Error(response?.error ?? 'Could not update FocusGuard rules.');
+  if (!response?.ok) throw new Error(response?.error ?? 'Could not update ReflectBlock rules.');
 }
 
 function formatRemaining(availableAt: number | null): string {
@@ -229,7 +229,7 @@ export function Options() {
   return (
     <main className="settings-dashboard">
       <aside className="settings-sidebar">
-        <div className="sidebar-brand"><FocusGuardLogo /><span>FocusGuard</span></div>
+        <div className="sidebar-brand"><FocusGuardLogo /><span>ReflectBlock</span></div>
         <nav className="sidebar-nav" aria-label="Settings sections">
           <a href="#overview" className={activeSection === 'overview' ? 'active' : ''} onClick={() => setActiveSection('overview')}><UiIcon name="home" />Overview</a>
           <a href="#website-blocking" className={activeSection === 'website-blocking' ? 'active' : ''} onClick={() => setActiveSection('website-blocking')}><UiIcon name="globe" />Website blocking</a>
@@ -242,13 +242,13 @@ export function Options() {
 
       <div className="settings-content">
         <header className="settings-header" id="overview">
-          <div><p className="eyebrow">FOCUSGUARD</p><h1>Settings</h1><p>Build a calmer browser, one intentional choice at a time.</p></div>
+          <div><p className="eyebrow">REFLECTBLOCK</p><h1>Settings</h1><p>Build a calmer browser, one intentional choice at a time.</p></div>
         </header>
 
         <section className="protection-banner">
           <div className="status-copy">
             <span className={settings.protectionEnabled ? 'status-dot' : 'status-dot off'} />
-            <div><strong>{settings.protectionEnabled ? 'Protection is on' : 'Protection is off'}</strong><small>{settings.protectionEnabled ? 'FocusGuard is blocking your selected distractions.' : 'Your block rules are paused.'}</small></div>
+            <div><strong>{settings.protectionEnabled ? 'Protection is on' : 'Protection is off'}</strong><small>{settings.protectionEnabled ? 'ReflectBlock is blocking your selected distractions.' : 'Your block rules are paused.'}</small></div>
           </div>
           <label className="fg-switch" aria-label="Toggle protection"><input type="checkbox" checked={settings.protectionEnabled} disabled={busy} onChange={(event) => void handleProtectionToggle(event.target.checked)} /><span /></label>
           {disableCountdown && <p className="inline-warning">Disable request pending: {disableCountdown}</p>}

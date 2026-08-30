@@ -1,6 +1,6 @@
-# FocusGuard
+# ReflectBlock : Website & Adult Site Blocker
 
-FocusGuard is a privacy-focused Chrome extension for selective website and distraction blocking.
+ReflectBlock is a privacy-focused Chrome extension for selective website and distraction blocking.
 
 This repository currently contains the **v0.3 adult-content protection milestone**:
 
@@ -10,7 +10,7 @@ This repository currently contains the **v0.3 adult-content protection milestone
 - Current-site detection
 - Local storage abstraction
 - Dynamic domain, URL-prefix, and URL-keyword blocking with Manifest V3 `declarativeNetRequest`
-- Custom FocusGuard block page
+- Custom ReflectBlock block page
 - Blocking schedules, including overnight schedules
 - Adult Content Shield with a bundled, curated domain snapshot
 - YouTube Shorts, Facebook Reels, and Instagram Reels blocking
@@ -18,14 +18,14 @@ This repository currently contains the **v0.3 adult-content protection milestone
 - Uninstall reminder configuration for a hosted, personal motivation page
 - Full settings page
 
-The **Block Current Website** button saves the hostname locally, creates a dynamic blocking rule, and reloads the current tab onto the FocusGuard block page. A hostname rule covers all paths and subdomains. URL-prefix rules can block only a specific path.
+The **Block Current Website** button saves the hostname locally, creates a dynamic blocking rule, and reloads the current tab onto the ReflectBlock block page. A hostname rule covers all paths and subdomains. URL-prefix rules can block only a specific path.
 
 ## Adult Content Shield
 
 Adult Content Shield is enabled by default and uses a bundled snapshot of 155,830
 known adult-content domains. The rules are packaged with the extension: no browsing
 history or visited URLs are sent to a server. Chrome's static-rule quota is shared
-with other filtering extensions, so FocusGuard enables as many of its six adult
+with other filtering extensions, so ReflectBlock enables as many of its six adult
 rulesets as the browser permits. The source and license notice are in
 `THIRD_PARTY_NOTICES.md`.
 
@@ -44,6 +44,6 @@ npm run build
 2. Enable **Developer mode**.
 3. Click **Load unpacked**.
 4. Select this project's `dist` folder.
-5. Pin FocusGuard and open its popup.
+5. Pin ReflectBlock and open its popup.
 
 After making changes, run `npm run build` again and click the reload button on the extension card.
