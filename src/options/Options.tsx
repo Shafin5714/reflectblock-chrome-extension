@@ -14,6 +14,7 @@ import {
 import type { FocusGuardSettings } from '../storage/types';
 import { ADULT_DOMAIN_COUNT } from '../background/adult-rulesets';
 import { FocusGuardLogo } from '../shared/FocusGuardLogo';
+import { UiIcon } from '../shared/UiIcon';
 
 const WEEK_DAYS = [
   { value: 1, label: 'Mon' },
@@ -36,11 +37,26 @@ function formatRemaining(availableAt: number | null): string {
   return `${minutes} minute${minutes === 1 ? '' : 's'} remaining`;
 }
 
+function formatScheduleSummary(settings: FocusGuardSettings): string {
+  const { schedule } = settings;
+  if (!schedule.enabled) return 'Always active';
+  const weekdays = [1, 2, 3, 4, 5];
+  const everyDay = [0, 1, 2, 3, 4, 5, 6];
+  const dayLabel = weekdays.every((day) => schedule.days.includes(day)) && schedule.days.length === weekdays.length
+    ? 'Weekdays'
+    : everyDay.every((day) => schedule.days.includes(day)) && schedule.days.length === everyDay.length
+      ? 'Every day'
+      : `${schedule.days.length} selected days`;
+  return `${dayLabel}, ${schedule.startTime} – ${schedule.endTime}`;
+}
+
 export function Options() {
   const [settings, setSettings] = useState<FocusGuardSettings>(DEFAULT_SETTINGS);
   const [domain, setDomain] = useState('');
   const [urlPrefix, setUrlPrefix] = useState('');
   const [urlKeyword, setUrlKeyword] = useState('');
+  const [ruleMode, setRuleMode] = useState<'domain' | 'url-prefix' | 'keyword'>('domain');
+  const [activeSection, setActiveSection] = useState('overview');
   const [message, setMessage] = useState('');
   const [busy, setBusy] = useState(false);
 
@@ -137,10 +153,10 @@ export function Options() {
     }
   }
 
-  async function handleProtectionToggle(): Promise<void> {
+  async function handleProtectionToggle(nextEnabled: boolean): Promise<void> {
     setBusy(true);
     try {
-      if (!settings.protectionEnabled) {
+      if (nextEnabled) {
         await setProtectionEnabled(true);
         await syncRules();
         await refresh();
@@ -211,113 +227,77 @@ export function Options() {
   }
 
   return (
-    <main className="settings-page">
-      <section className="settings-card settings-hero">
-        <div className="brand">
-          <FocusGuardLogo />
-          <div><h1>FocusGuard Settings</h1><p>Build a calmer browser, one intentional rule at a time.</p></div>
-        </div>
-        <div className="protection-row">
-          <div>
-            <div className="label">Protection</div>
-            <strong>{settings.protectionEnabled ? 'Enabled' : 'Disabled'}</strong>
-            {disableCountdown && <p className="warning-text">Disable request pending: {disableCountdown}</p>}
-          </div>
-          <button className={settings.protectionEnabled ? 'button button-secondary compact-button' : 'button button-primary compact-button'} disabled={busy} onClick={() => void handleProtectionToggle()}>
-            {settings.protectionEnabled ? 'Turn off protection' : 'Turn on protection'}
-          </button>
-        </div>
-      </section>
+    <main className="settings-dashboard">
+      <aside className="settings-sidebar">
+        <div className="sidebar-brand"><FocusGuardLogo /><span>FocusGuard</span></div>
+        <nav className="sidebar-nav" aria-label="Settings sections">
+          <a href="#overview" className={activeSection === 'overview' ? 'active' : ''} onClick={() => setActiveSection('overview')}><UiIcon name="home" />Overview</a>
+          <a href="#website-blocking" className={activeSection === 'website-blocking' ? 'active' : ''} onClick={() => setActiveSection('website-blocking')}><UiIcon name="globe" />Website blocking</a>
+          <a href="#focus-tools" className={activeSection === 'focus-tools' ? 'active' : ''} onClick={() => setActiveSection('focus-tools')}><UiIcon name="eye-off" />Focus tools</a>
+          <a href="#schedule" className={activeSection === 'schedule' ? 'active' : ''} onClick={() => setActiveSection('schedule')}><UiIcon name="calendar" />Schedule</a>
+          <a href="#safety" className={activeSection === 'safety' ? 'active' : ''} onClick={() => setActiveSection('safety')}><UiIcon name="shield" />Safety</a>
+        </nav>
+        <p className="sidebar-note"><UiIcon name="info" size={17} /> Settings stay on this device.</p>
+      </aside>
 
-      <section className="settings-card">
-        <div className="section-heading"><div><h2>Website blocking</h2><p>Block a whole domain, a URL path, or any URL containing a chosen keyword.</p></div></div>
-        <form className="inline-form" onSubmit={(event) => void handleAddDomain(event)}>
-          <input value={domain} onChange={(event) => setDomain(event.target.value)} placeholder="example.com" aria-label="Website domain" />
-          <button className="button button-primary form-button" disabled={busy}>Block website</button>
-        </form>
-        <form className="inline-form" onSubmit={(event) => void handleAddUrlPrefix(event)}>
-          <input value={urlPrefix} onChange={(event) => setUrlPrefix(event.target.value)} placeholder="https://example.com/distraction" aria-label="Specific URL path" />
-          <button className="button button-secondary form-button" disabled={busy}>Block URL path</button>
-        </form>
-        <form className="inline-form" onSubmit={(event) => void handleAddUrlKeyword(event)}>
-          <input value={urlKeyword} onChange={(event) => setUrlKeyword(event.target.value)} placeholder="shorts" aria-label="URL keyword" />
-          <button className="button button-secondary form-button" disabled={busy}>Block URL keyword</button>
-        </form>
-        <ul className="site-list">
-          {settings.blockedSites.length === 0 ? <li className="empty-row">No block rules yet.</li> : settings.blockedSites.map((site) => (
-            <li key={site.id}>
-              <div>
-                <strong>{site.type === 'url-prefix' ? site.pattern.replace(/^\|/, '') : site.pattern}</strong>
-                <span>{site.type === 'url-prefix' ? 'URL PATH' : site.type === 'keyword' ? 'URL KEYWORD' : 'ENTIRE WEBSITE'}</span>
+      <div className="settings-content">
+        <header className="settings-header" id="overview">
+          <div><p className="eyebrow">FOCUSGUARD</p><h1>Settings</h1><p>Build a calmer browser, one intentional choice at a time.</p></div>
+        </header>
+
+        <section className="protection-banner">
+          <div className="status-copy">
+            <span className={settings.protectionEnabled ? 'status-dot' : 'status-dot off'} />
+            <div><strong>{settings.protectionEnabled ? 'Protection is on' : 'Protection is off'}</strong><small>{settings.protectionEnabled ? 'FocusGuard is blocking your selected distractions.' : 'Your block rules are paused.'}</small></div>
+          </div>
+          <label className="fg-switch" aria-label="Toggle protection"><input type="checkbox" checked={settings.protectionEnabled} disabled={busy} onChange={(event) => void handleProtectionToggle(event.target.checked)} /><span /></label>
+          {disableCountdown && <p className="inline-warning">Disable request pending: {disableCountdown}</p>}
+        </section>
+
+        <div className="settings-columns">
+          <div className="settings-primary">
+            <section className="dashboard-card" id="website-blocking">
+              <div className="card-heading"><div><h2>Website blocking</h2><p>Choose what should not interrupt you.</p></div><span className="rule-count">{settings.blockedSites.length} rules</span></div>
+              <div className="rule-mode-tabs" role="tablist" aria-label="Rule type">
+                <button type="button" role="tab" aria-selected={ruleMode === 'domain'} className={ruleMode === 'domain' ? 'active' : ''} onClick={() => setRuleMode('domain')}>Website</button>
+                <button type="button" role="tab" aria-selected={ruleMode === 'url-prefix'} className={ruleMode === 'url-prefix' ? 'active' : ''} onClick={() => setRuleMode('url-prefix')}>URL path</button>
+                <button type="button" role="tab" aria-selected={ruleMode === 'keyword'} className={ruleMode === 'keyword' ? 'active' : ''} onClick={() => setRuleMode('keyword')}>URL keyword</button>
               </div>
-              <button className="remove-button" disabled={busy} onClick={() => void handleRemove(site.id)}>Remove</button>
-            </li>
-          ))}
-        </ul>
-      </section>
+              <form className="rule-form" onSubmit={(event) => void (ruleMode === 'domain' ? handleAddDomain(event) : ruleMode === 'url-prefix' ? handleAddUrlPrefix(event) : handleAddUrlKeyword(event))}>
+                <div><input value={ruleMode === 'domain' ? domain : ruleMode === 'url-prefix' ? urlPrefix : urlKeyword} onChange={(event) => ruleMode === 'domain' ? setDomain(event.target.value) : ruleMode === 'url-prefix' ? setUrlPrefix(event.target.value) : setUrlKeyword(event.target.value)} placeholder={ruleMode === 'domain' ? 'e.g. reddit.com' : ruleMode === 'url-prefix' ? 'https://example.com/distraction' : 'e.g. shorts'} aria-label={ruleMode === 'domain' ? 'Website domain' : ruleMode === 'url-prefix' ? 'Specific URL path' : 'URL keyword'} /><button className="button button-primary" disabled={busy}>{ruleMode === 'domain' ? 'Add website' : ruleMode === 'url-prefix' ? 'Add path' : 'Add keyword'}</button></div>
+                <small>{ruleMode === 'domain' ? 'Blocks the entire website, including subdomains.' : ruleMode === 'url-prefix' ? 'Blocks one specific page or URL path.' : 'Blocks any website URL containing this text.'}</small>
+              </form>
+              <div className="list-label">Blocked rules</div>
+              <ul className="rule-list">
+                {settings.blockedSites.length === 0 ? <li className="empty-row">No block rules yet. Add the first one above.</li> : settings.blockedSites.map((site) => (
+                  <li key={site.id}><span className="rule-icon"><UiIcon name={site.type === 'keyword' ? 'sparkle' : 'globe'} /></span><div><strong>{site.type === 'url-prefix' ? site.pattern.replace(/^\|/, '') : site.pattern}</strong><small>{site.type === 'url-prefix' ? 'URL path' : site.type === 'keyword' ? 'URL keyword' : 'Entire website'}</small></div><button className="icon-button remove-button" disabled={busy} onClick={() => void handleRemove(site.id)} aria-label={`Remove ${site.pattern}`}><UiIcon name="close" /></button></li>
+                ))}
+              </ul>
+            </section>
 
-      <section className="settings-card">
-        <div className="section-heading"><div><h2>Adult Content Shield</h2><p>Block a large curated list of known adult-content domains before they load.</p></div></div>
-        <label className="setting-toggle">
-          <input type="checkbox" checked={settings.adultContentShield.enabled} disabled={busy} onChange={(event) => void handleAdultShieldToggle(event.target.checked)} />
-          <span><strong>Block known adult-content websites</strong><small>{ADULT_DOMAIN_COUNT.toLocaleString()} domains are bundled with this version. The exact number Chrome enables can be lower if other extensions already use its static-rule quota.</small></span>
-        </label>
-      </section>
+            <section className="dashboard-card" id="focus-tools">
+              <div className="card-heading"><div><h2>Focus tools</h2><p>Remove high-distraction areas without blocking normal content.</p></div></div>
+              <label className="feature-row"><span className="feature-icon"><UiIcon name="eye-off" /></span><span><strong>Block YouTube Shorts</strong><small>Hide shelves, links, and Shorts pages.</small></span><span className="fg-switch"><input type="checkbox" checked={settings.selectiveBlocking.youtubeShorts} disabled={busy} onChange={(event) => void save({ ...settings, selectiveBlocking: { ...settings.selectiveBlocking, youtubeShorts: event.target.checked } }, 'YouTube Shorts setting updated.')} /><i /></span></label>
+              <label className="feature-row"><span className="feature-icon"><UiIcon name="eye-off" /></span><span><strong>Block Facebook Reels</strong><small>Hide Reel cards and block Reel pages.</small></span><span className="fg-switch"><input type="checkbox" checked={settings.selectiveBlocking.facebookFeedReels} disabled={busy} onChange={(event) => void save({ ...settings, selectiveBlocking: { ...settings.selectiveBlocking, facebookFeedReels: event.target.checked } }, 'Facebook Reels setting updated.')} /><i /></span></label>
+              <label className="feature-row"><span className="feature-icon"><UiIcon name="eye-off" /></span><span><strong>Block Instagram Reels</strong><small>Hide Reel links and block Reel pages.</small></span><span className="fg-switch"><input type="checkbox" checked={settings.selectiveBlocking.instagramReels} disabled={busy} onChange={(event) => void save({ ...settings, selectiveBlocking: { ...settings.selectiveBlocking, instagramReels: event.target.checked } }, 'Instagram Reels setting updated.')} /><i /></span></label>
+            </section>
 
-      <section className="settings-card">
-        <div className="section-heading"><div><h2>Selective distraction blocking</h2><p>Hide attention traps while keeping the rest of the site usable.</p></div></div>
-        <label className="setting-toggle">
-          <input type="checkbox" checked={settings.selectiveBlocking.youtubeShorts} disabled={busy} onChange={(event) => void save({ ...settings, selectiveBlocking: { ...settings.selectiveBlocking, youtubeShorts: event.target.checked } }, 'YouTube Shorts setting updated.')} />
-          <span><strong>Block YouTube Shorts</strong><small>Hides Shorts shelves and navigation links, and blocks Shorts pages. Normal videos remain available.</small></span>
-        </label>
-        <label className="setting-toggle">
-          <input type="checkbox" checked={settings.selectiveBlocking.facebookFeedReels} disabled={busy} onChange={(event) => void save({ ...settings, selectiveBlocking: { ...settings.selectiveBlocking, facebookFeedReels: event.target.checked } }, 'Facebook Reels setting updated.')} />
-          <span><strong>Block Facebook Reels</strong><small>Hides Reel cards in the feed and blocks Facebook Reel pages.</small></span>
-        </label>
-        <label className="setting-toggle">
-          <input type="checkbox" checked={settings.selectiveBlocking.instagramReels} disabled={busy} onChange={(event) => void save({ ...settings, selectiveBlocking: { ...settings.selectiveBlocking, instagramReels: event.target.checked } }, 'Instagram Reels setting updated.')} />
-          <span><strong>Block Instagram Reels</strong><small>Hides Reel links and feed posts, and blocks Instagram Reel pages.</small></span>
-        </label>
-      </section>
-
-      <section className="settings-card">
-        <div className="section-heading"><div><h2>Schedule</h2><p>Only enforce website blocks during your chosen focus hours.</p></div></div>
-        <label className="setting-toggle">
-          <input type="checkbox" checked={settings.schedule.enabled} disabled={busy} onChange={(event) => updateSchedule('enabled', event.target.checked)} />
-          <span><strong>Use a blocking schedule</strong><small>Selective Shorts/Reels hiding stays active independently.</small></span>
-        </label>
-        {settings.schedule.enabled && <>
-          <div className="day-picker" aria-label="Focus days">
-            {WEEK_DAYS.map((day) => <button key={day.value} type="button" disabled={busy} className={settings.schedule.days.includes(day.value) ? 'day-button active' : 'day-button'} onClick={() => toggleDay(day.value)}>{day.label}</button>)}
+            <section className="dashboard-card" id="schedule">
+              <div className="card-heading"><div><h2>Schedule</h2><p>Apply website and keyword rules only during your chosen focus hours.</p></div><label className="fg-switch"><input type="checkbox" checked={settings.schedule.enabled} disabled={busy} onChange={(event) => updateSchedule('enabled', event.target.checked)} /><span /></label></div>
+              {settings.schedule.enabled && <><div className="day-picker" aria-label="Focus days">{WEEK_DAYS.map((day) => <button key={day.value} type="button" disabled={busy} className={settings.schedule.days.includes(day.value) ? 'day-button active' : 'day-button'} onClick={() => toggleDay(day.value)}>{day.label}</button>)}</div><div className="time-grid"><label>Start<input type="time" value={settings.schedule.startTime} disabled={busy} onChange={(event) => updateSchedule('startTime', event.target.value)} /></label><label>End<input type="time" value={settings.schedule.endTime} disabled={busy} onChange={(event) => updateSchedule('endTime', event.target.value)} /></label></div></>}
+              {!settings.schedule.enabled && <p className="schedule-off">Website and keyword rules are active all day. Focus tools always stay active.</p>}
+            </section>
           </div>
-          <div className="time-grid">
-            <label>Start<input type="time" value={settings.schedule.startTime} disabled={busy} onChange={(event) => updateSchedule('startTime', event.target.value)} /></label>
-            <label>End<input type="time" value={settings.schedule.endTime} disabled={busy} onChange={(event) => updateSchedule('endTime', event.target.value)} /></label>
-          </div>
-        </>}
-      </section>
 
-      <section className="settings-card">
-        <div className="section-heading"><div><h2>Strict Mode</h2><p>Make disabling protection a deliberate decision.</p></div></div>
-        <label className="setting-toggle">
-          <input type="checkbox" checked={settings.strictMode.enabled} disabled={busy} onChange={(event) => void handleStrictModeToggle(event.target.checked)} />
-          <span><strong>Require a 15-minute cooldown</strong><small>This delays disabling FocusGuard and switching Strict Mode off. Chrome extension removal cannot be delayed by any extension.</small></span>
-        </label>
-        {strictModeCountdown && <p className="warning-text">Strict Mode unlock pending: {strictModeCountdown}</p>}
-      </section>
-
-      <section className="settings-card">
-        <div className="section-heading"><div><h2>Uninstall reminder</h2><p>Open your personal motivation page after FocusGuard is removed.</p></div></div>
-        <label className="setting-toggle">
-          <input type="checkbox" checked={settings.uninstallReminder.enabled} disabled={busy} onChange={(event) => void save({ ...settings, uninstallReminder: { ...settings.uninstallReminder, enabled: event.target.checked } }, event.target.checked ? 'The hosted reminder will open after removal.' : 'Uninstall reminder is off.')} />
-          <span><strong>Open a hosted reminder page</strong><small>Your family photo will be added here after you upload it and we host its private reminder page.</small></span>
-        </label>
-        <label className="field-label">Hosted reminder page URL
-          <input value={settings.uninstallReminder.hostedPageUrl} disabled={busy} onChange={(event) => setSettings({ ...settings, uninstallReminder: { ...settings.uninstallReminder, hostedPageUrl: event.target.value } })} onBlur={() => void save(settings)} placeholder="https://your-private-page.example/reminder" inputMode="url" />
-        </label>
-      </section>
-
-      <p className="message" role="status">{message}</p>
+          <aside className="settings-safety" id="safety">
+            <h2>Safety</h2>
+            <section className="safety-card"><label className="safety-row"><span className="feature-icon"><UiIcon name="shield" /></span><span><strong>Adult content shield</strong><small>{ADULT_DOMAIN_COUNT.toLocaleString()} known domains</small></span><span className="fg-switch"><input type="checkbox" checked={settings.adultContentShield.enabled} disabled={busy} onChange={(event) => void handleAdultShieldToggle(event.target.checked)} /><i /></span></label><label className="safety-row"><span className="feature-icon"><UiIcon name="calendar" /></span><span><strong>Strict Mode</strong><small>15-minute cooldown to turn off protection</small></span><span className="fg-switch"><input type="checkbox" checked={settings.strictMode.enabled} disabled={busy} onChange={(event) => void handleStrictModeToggle(event.target.checked)} /><i /></span></label>{strictModeCountdown && <p className="inline-warning">Strict Mode unlock pending: {strictModeCountdown}</p>}</section>
+            <section className="safety-card reminder-card"><div className="card-heading"><div><h3>Uninstall reminder</h3><p>Open your hosted motivation page after removal.</p></div></div><label className="feature-row compact"><span><strong>Enable reminder</strong><small>Requires a secure hosted URL.</small></span><span className="fg-switch"><input type="checkbox" checked={settings.uninstallReminder.enabled} disabled={busy} onChange={(event) => void save({ ...settings, uninstallReminder: { ...settings.uninstallReminder, enabled: event.target.checked } }, event.target.checked ? 'The hosted reminder will open after removal.' : 'Uninstall reminder is off.')} /><i /></span></label><label className="field-label">Hosted reminder page URL<input value={settings.uninstallReminder.hostedPageUrl} disabled={busy} onChange={(event) => setSettings({ ...settings, uninstallReminder: { ...settings.uninstallReminder, hostedPageUrl: event.target.value } })} onBlur={() => void save(settings)} placeholder="https://your-private-page.example/reminder" inputMode="url" /></label></section>
+            <p className="schedule-summary"><UiIcon name="calendar" /> {formatScheduleSummary(settings)}</p>
+          </aside>
+        </div>
+        <p className="message" role="status">{message}</p>
+      </div>
     </main>
   );
 }
