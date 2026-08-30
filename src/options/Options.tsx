@@ -1,6 +1,7 @@
 import { FormEvent, useEffect, useMemo, useState } from 'react';
 import {
   addBlockedSite,
+  addBlockedUrlKeyword,
   addBlockedUrlPrefix,
   DEFAULT_SETTINGS,
   getSettings,
@@ -39,6 +40,7 @@ export function Options() {
   const [settings, setSettings] = useState<FocusGuardSettings>(DEFAULT_SETTINGS);
   const [domain, setDomain] = useState('');
   const [urlPrefix, setUrlPrefix] = useState('');
+  const [urlKeyword, setUrlKeyword] = useState('');
   const [message, setMessage] = useState('');
   const [busy, setBusy] = useState(false);
 
@@ -100,6 +102,22 @@ export function Options() {
       setMessage(added ? 'URL path added to the block list.' : 'That URL path is already blocked.');
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'Could not add the URL path.');
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function handleAddUrlKeyword(event: FormEvent<HTMLFormElement>): Promise<void> {
+    event.preventDefault();
+    setBusy(true);
+    try {
+      const added = await addBlockedUrlKeyword(urlKeyword);
+      await syncRules();
+      await refresh();
+      setUrlKeyword('');
+      setMessage(added ? 'URL keyword added to the block list.' : 'That URL keyword is already blocked.');
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Could not add the URL keyword.');
     } finally {
       setBusy(false);
     }
@@ -212,7 +230,7 @@ export function Options() {
       </section>
 
       <section className="settings-card">
-        <div className="section-heading"><div><h2>Website blocking</h2><p>Block a whole domain, including its paths and subdomains.</p></div></div>
+        <div className="section-heading"><div><h2>Website blocking</h2><p>Block a whole domain, a URL path, or any URL containing a chosen keyword.</p></div></div>
         <form className="inline-form" onSubmit={(event) => void handleAddDomain(event)}>
           <input value={domain} onChange={(event) => setDomain(event.target.value)} placeholder="example.com" aria-label="Website domain" />
           <button className="button button-primary form-button" disabled={busy}>Block website</button>
@@ -221,12 +239,16 @@ export function Options() {
           <input value={urlPrefix} onChange={(event) => setUrlPrefix(event.target.value)} placeholder="https://example.com/distraction" aria-label="Specific URL path" />
           <button className="button button-secondary form-button" disabled={busy}>Block URL path</button>
         </form>
+        <form className="inline-form" onSubmit={(event) => void handleAddUrlKeyword(event)}>
+          <input value={urlKeyword} onChange={(event) => setUrlKeyword(event.target.value)} placeholder="shorts" aria-label="URL keyword" />
+          <button className="button button-secondary form-button" disabled={busy}>Block URL keyword</button>
+        </form>
         <ul className="site-list">
           {settings.blockedSites.length === 0 ? <li className="empty-row">No block rules yet.</li> : settings.blockedSites.map((site) => (
             <li key={site.id}>
               <div>
                 <strong>{site.type === 'url-prefix' ? site.pattern.replace(/^\|/, '') : site.pattern}</strong>
-                <span>{site.type === 'url-prefix' ? 'URL PATH' : 'ENTIRE WEBSITE'}</span>
+                <span>{site.type === 'url-prefix' ? 'URL PATH' : site.type === 'keyword' ? 'URL KEYWORD' : 'ENTIRE WEBSITE'}</span>
               </div>
               <button className="remove-button" disabled={busy} onClick={() => void handleRemove(site.id)}>Remove</button>
             </li>

@@ -79,6 +79,12 @@ export function normalizeUrlPrefix(value: string): string | null {
   }
 }
 
+export function normalizeUrlKeyword(value: string): string | null {
+  const keyword = value.trim().toLowerCase();
+  if (keyword.length < 2 || keyword.length > 100 || /[\s*|^]/.test(keyword)) return null;
+  return keyword;
+}
+
 async function addRule(pattern: string, type: BlockRuleType): Promise<boolean> {
   const settings = await getSettings();
   const exists = settings.blockedSites.some((site) => site.pattern === pattern && site.type === type);
@@ -105,6 +111,12 @@ export async function addBlockedUrlPrefix(url: string): Promise<boolean> {
   const prefix = normalizeUrlPrefix(url);
   if (!prefix) throw new Error('Enter a full http or https URL.');
   return addRule(prefix, 'url-prefix');
+}
+
+export async function addBlockedUrlKeyword(value: string): Promise<boolean> {
+  const keyword = normalizeUrlKeyword(value);
+  if (!keyword) throw new Error('Enter a 2–100 character URL keyword without spaces, *, |, or ^.');
+  return addRule(keyword, 'keyword');
 }
 
 export async function removeBlockedSite(id: string): Promise<void> {

@@ -1,4 +1,4 @@
-export type BlockRuleType = 'domain' | 'url-prefix';
+export type BlockRuleType = 'domain' | 'url-prefix' | 'keyword';
 
 export interface BlockedSite {
   id: string;

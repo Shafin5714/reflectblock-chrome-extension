@@ -116,7 +116,29 @@ async function syncAdultContentRules(enabled: boolean): Promise<void> {
 }
 
 function getRuleFilter(site: { pattern: string; type: string }): string {
-  return site.type === 'url-prefix' ? site.pattern : `||${site.pattern}^`;
+  if (site.type === 'url-prefix' || site.type === 'keyword') return site.pattern;
+  return `||${site.pattern}^`;
+}
+
+function isSavedRuleBlocked(
+  urlValue: string,
+  settings: Awaited<ReturnType<typeof getSettings>>,
+): boolean {
+  if (!settings.protectionEnabled || !isScheduleActive(settings)) return false;
+
+  try {
+    const url = new URL(urlValue);
+    if (url.protocol !== 'http:' && url.protocol !== 'https:') return false;
+    const normalizedUrl = url.href.toLowerCase();
+    return settings.blockedSites.some((site) => {
+      if (!site.enabled) return false;
+      if (site.type === 'keyword') return normalizedUrl.includes(site.pattern.toLowerCase());
+      if (site.type === 'url-prefix') return normalizedUrl.startsWith(site.pattern.replace(/^\|/, '').toLowerCase());
+      return isDomain(url.hostname, site.pattern);
+    });
+  } catch {
+    return false;
+  }
 }
 
 function getReminderUrl(settings: Awaited<ReturnType<typeof getSettings>>): string {
@@ -200,7 +222,8 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo) => {
   if (!changeInfo.url) return;
 
   void getSettings().then((settings) => {
-    if (!isSelectiveRouteBlocked(changeInfo.url!, settings)) return;
+    if (!isSelectiveRouteBlocked(changeInfo.url!, settings)
+      && !isSavedRuleBlocked(changeInfo.url!, settings)) return;
     return chrome.tabs.update(tabId, { url: chrome.runtime.getURL('blocked.html') });
   });
 });

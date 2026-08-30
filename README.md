@@ -9,11 +9,11 @@ This repository currently contains the **v0.3 adult-content protection milestone
 - Extension popup
 - Current-site detection
 - Local storage abstraction
-- Dynamic domain and URL-prefix blocking with Manifest V3 `declarativeNetRequest`
+- Dynamic domain, URL-prefix, and URL-keyword blocking with Manifest V3 `declarativeNetRequest`
 - Custom FocusGuard block page
 - Blocking schedules, including overnight schedules
 - Adult Content Shield with a bundled, curated domain snapshot
-- YouTube Shorts and Facebook feed-Reels hiding
+- YouTube Shorts, Facebook Reels, and Instagram Reels blocking
 - Strict Mode: a 15-minute intentional delay before protection can be disabled
 - Uninstall reminder configuration for a hosted, personal motivation page
 - Full settings page
