@@ -1,4 +1,4 @@
-# ReflectBlock : Website & Adult Site Blocker
+# ReflectBlock: Website & Adult Site Blocker
 
 ReflectBlock is a privacy-focused Chrome extension for selective website and distraction blocking.
 

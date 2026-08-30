@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
-  "name": "ReflectBlock : Website & Adult Site Blocker",
-  "description": "Block distracting websites, URL keywords, and adult-content sites.",
+  "name": "ReflectBlock: Website & Adult Site Blocker",
+  "description": "Free website and adult-content blocker with Shorts/Reels controls, focus schedules, and local-only settings.",
   "version": "0.3.1",
   "permissions": ["storage", "tabs", "alarms", "declarativeNetRequest"],
   "host_permissions": ["<all_urls>"],
@@ -10,7 +10,7 @@
     "type": "module"
   },
   "action": {
-    "default_title": "ReflectBlock : Website & Adult Site Blocker",
+    "default_title": "ReflectBlock: Website & Adult Site Blocker",
     "default_popup": "popup.html",
     "default_icon": {
       "16": "icons/icon-16.png",
